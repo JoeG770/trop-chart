@@ -1,0 +1,134 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="טעמי המקרא"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b1f4d"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="apple-touch-icon" sizes="152x152" href="icon-152.png"><link rel="apple-touch-icon" sizes="167x167" href="icon-167.png"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><title>טעמי המקרא</title>
+<style>
+@font-face{font-family:"ChartHeb";src:url(hebrew.ttf) format("truetype");font-weight:700}
+:root{--navy:#1c2b52;--gold:#b8963e}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:#eceae4;font-family:"ChartHeb","Taamey Frank CLM",serif;color:#111;overflow:hidden;display:flex;flex-direction:column;padding:10px 12px}
+.bar{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.modes{display:flex;border:1px solid var(--navy);border-radius:999px;overflow:hidden}
+.modes button{font:inherit;font-size:18px;padding:7px 22px;border:0;background:#fff;color:var(--navy);cursor:pointer;min-height:44px}
+.modes button+button{border-right:1px solid var(--navy)}
+.voice button{font-size:16px;padding:5px 16px;min-height:40px}.modes button.on{background:var(--navy);color:#fff}
+.ctl{display:flex;align-items:center;gap:10px;font-size:18px;color:var(--navy);min-height:44px}
+.ctl button,.ctl a{font:inherit;font-size:17px;padding:6px 18px;border-radius:999px;border:1px solid var(--navy);background:#fff;color:var(--navy);min-height:42px;cursor:pointer;text-decoration:none}
+.score{border:1px solid var(--gold);border-radius:999px;padding:3px 12px}
+#wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+#outer{padding:6px;background:#fff;border:1px solid var(--gold);box-shadow:0 0 0 3px #fff,0 0 0 4px var(--navy),0 6px 18px rgba(0,0,0,.15)}
+#stage{position:relative;width:1000px;height:750px;transform-origin:0 0;overflow:hidden;
+background:radial-gradient(ellipse 70% 62% at 50% 52%,#fdfdfc 0%,#ececea 55%,#cfcfcc 100%)}
+#holder{position:relative;overflow:hidden}#stage{position:absolute;top:0;left:0}
+.deco{position:absolute;inset:0;pointer-events:none}
+.title{position:absolute;top:26px;font-weight:700;font-size:84px;line-height:1;color:#151515;letter-spacing:1px}
+.t1{right:205px}.t2{left:150px}
+.box{position:absolute;width:92px;height:94px;background:#fdfdfd;border:1.6px solid #2b2b2b;display:flex;flex-direction:column;align-items:center;justify-content:center;
+font-weight:700;font-size:29px;line-height:1.12;color:#111;cursor:pointer;transition:box-shadow .3s,background .3s;padding-top:26px;white-space:nowrap}
+.tm{position:absolute;font-size:1.9em;line-height:1;pointer-events:none}
+.tm.a,.tm.al,.tm.ar{top:-.12em}.tm.b,.tm.br{bottom:-.02em}
+.tm.a,.tm.b{left:50%;transform:translateX(-50%)}.tm.al{left:-.12em}.tm.ar{right:-.12em}.tm.br{right:-.05em}
+.box.two{font-size:25px;line-height:1.25}
+.box svg.ic{position:absolute;top:4px;left:50%;transform:translateX(-50%)}
+.box{transition:transform .18s ease,opacity .25s ease,background-color .18s,box-shadow .18s}
+.haslit .box:not(.lit){opacity:.55}
+.box.lit{background:linear-gradient(#fff3b0,#ffd95a)!important;box-shadow:0 0 0 4px #c9971f,0 0 22px 8px rgba(255,200,40,.75),0 4px 14px rgba(0,0,0,.25);transform:scale(1.08);z-index:3;opacity:1;animation:litp 1.2s ease-in-out infinite}
+@keyframes litp{50%{box-shadow:0 0 0 4px #c9971f,0 0 30px 12px rgba(255,200,40,.9),0 4px 14px rgba(0,0,0,.25)}}
+.box.good{background:#e9f6e2;box-shadow:0 0 0 3px #6aa84f}.box.bad{background:#fbe6e3;box-shadow:0 0 0 3px #c0574b}
+.toast{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%);font-size:52px;color:var(--navy);background:#fff;border:1px solid var(--gold);border-radius:16px;padding:10px 30px;opacity:0;pointer-events:none;transition:.3s;font-weight:700}
+.toast.show{opacity:1}
+.conf{position:fixed;top:-20px;pointer-events:none;z-index:9;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.6}}
+</style></head><body>
+<div class="bar"><div class="modes"><button data-m="play" class="on">ניגון</button><button data-m="tap">הקשה</button><button data-m="game">משחק</button></div><div class="ctl" id="ctl"></div></div>
+<div id="wrap"><div id="outer"><div id="holder"><div id="stage">
+<svg class="deco" viewBox="0 0 1000 750">
+ <rect x="22" y="22" width="956" height="706" fill="none" stroke="#222" stroke-width="2.2"/>
+ <rect x="29" y="29" width="942" height="692" fill="none" stroke="#222" stroke-width="1"/>
+ <defs><g id="corner" fill="none" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round">
+  <path d="M8 8 C8 60 20 80 40 92 M8 8 C60 8 80 20 92 40"/>
+  <path d="M40 92 c10 6 22 4 24 -8 c2 -10 -10 -14 -14 -6"/><path d="M92 40 c6 10 4 22 -8 24 c-10 2 -14 -10 -6 -14"/>
+  <path d="M8 120 c14 -10 28 -6 30 8 c1 10 -10 12 -12 4"/><path d="M120 8 c-10 14 -6 28 8 30 c10 1 12 -10 4 -12"/>
+  <path d="M30 30 c10 -12 30 -10 34 6 c4 18 -18 26 -26 14 c-6 -9 6 -18 12 -10"/>
+  <path d="M20 160 q-6 20 6 38 M160 20 q20 -6 38 6"/>
+  <circle cx="64" cy="64" r="5" fill="#1a1a1a"/></g>
+  <g id="flower"><path d="M0 0 q-40.0 -29.0 -80 -30 q40.0 29.0 80 30z" fill="#4a4a4a" stroke="#333" stroke-width=".8"/><path d="M0 0 q-35.0 -10.0 -70 8 q35.0 10.0 70 -8z" fill="#5c5c5c" stroke="#333" stroke-width=".8"/><path d="M0 0 q39.0 -31.0 78 -34 q-39.0 31.0 -78 34z" fill="#4a4a4a" stroke="#333" stroke-width=".8"/><path d="M0 0 q36.0 -11.0 72 6 q-36.0 11.0 -72 -6z" fill="#5c5c5c" stroke="#333" stroke-width=".8"/><path d="M0 0 q-15.0 -40.0 -30 -52 q15.0 40.0 30 52z" fill="#6a6a6a" stroke="#333" stroke-width=".8"/><path d="M0 0 q18.0 -39.0 36 -50 q-18.0 39.0 -36 50z" fill="#6a6a6a" stroke="#333" stroke-width=".8"/><ellipse cx="0" cy="8" rx="58" ry="12" fill="#3d3d3d"/><ellipse cx="-26.0" cy="-25.2" rx="12.0" ry="7.7" transform="rotate(-90 -26.0 -25.2)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="-13.4" cy="-16.1" rx="12.0" ry="7.7" transform="rotate(-18 -13.4 -16.1)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="-18.2" cy="-1.3" rx="12.0" ry="7.7" transform="rotate(54 -18.2 -1.3)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="-33.8" cy="-1.3" rx="12.0" ry="7.7" transform="rotate(126 -33.8 -1.3)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="-38.6" cy="-16.1" rx="12.0" ry="7.7" transform="rotate(198 -38.6 -16.1)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><circle cx="-26" cy="-12" r="4.3" fill="#999"/><ellipse cx="14.0" cy="-35.4" rx="14.0" ry="9.0" transform="rotate(-90 14.0 -35.4)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="28.7" cy="-24.7" rx="14.0" ry="9.0" transform="rotate(-18 28.7 -24.7)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="23.0" cy="-7.5" rx="14.0" ry="9.0" transform="rotate(54 23.0 -7.5)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="4.9" cy="-7.5" rx="14.0" ry="9.0" transform="rotate(126 4.9 -7.5)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="-0.6" cy="-24.8" rx="14.0" ry="9.0" transform="rotate(198 -0.6 -24.8)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><circle cx="14" cy="-20" r="5.0" fill="#999"/><ellipse cx="44.0" cy="-13.9" rx="9.0" ry="5.8" transform="rotate(-90 44.0 -13.9)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="53.4" cy="-7.1" rx="9.0" ry="5.8" transform="rotate(-18 53.4 -7.1)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="49.8" cy="4.0" rx="9.0" ry="5.8" transform="rotate(54 49.8 4.0)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="38.2" cy="4.0" rx="9.0" ry="5.8" transform="rotate(126 38.2 4.0)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="34.6" cy="-7.1" rx="9.0" ry="5.8" transform="rotate(198 34.6 -7.1)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><circle cx="44" cy="-4" r="3.2" fill="#999"/><ellipse cx="-50.0" cy="-5.7" rx="7.0" ry="4.5" transform="rotate(-90 -50.0 -5.7)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="-42.7" cy="-0.4" rx="7.0" ry="4.5" transform="rotate(-18 -42.7 -0.4)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="-45.5" cy="8.2" rx="7.0" ry="4.5" transform="rotate(54 -45.5 8.2)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="-54.5" cy="8.2" rx="7.0" ry="4.5" transform="rotate(126 -54.5 8.2)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><ellipse cx="-57.3" cy="-0.4" rx="7.0" ry="4.5" transform="rotate(198 -57.3 -0.4)" fill="#f4f4f2" stroke="#666" stroke-width="1"/><circle cx="-50" cy="2" r="2.5" fill="#999"/></g></defs>
+ <use href="#corner" x="0" y="0"/><use href="#corner" transform="translate(1000,0) scale(-1,1)"/>
+ <use href="#corner" transform="translate(0,750) scale(1,-1)"/><use href="#corner" transform="translate(1000,750) scale(-1,-1)"/>
+ <use href="#flower" transform="translate(205,690)"/><use href="#flower" transform="translate(800,690) scale(-1,1)"/>
+ <g transform="translate(500,92)" fill="none" stroke="#333" stroke-width="1.6">
+  <rect x="-48" y="-40" width="8" height="78" rx="3" fill="#ddd"/><rect x="40" y="-40" width="8" height="78" rx="3" fill="#ddd"/>
+  <rect x="-40" y="-30" width="80" height="60" fill="#f4f4f2"/>
+  <path d="M-24 -6 h48 v10 h-48z M-28 4 h56 v12 h-56z M-32 16 h64 v12 h-64z" fill="#3b3b3b"/>
+  <path d="M-14 -30 l-4 -14 8 6 6 -10 6 10 8 -6 -4 14z" fill="#bbb"/>
+  <text x="0" y="-19" font-size="8" fill="#333" stroke="none" text-anchor="middle" font-family="ChartHeb">תלמוד תורה</text>
+  <text x="0" y="46" font-size="15" fill="#222" stroke="none" text-anchor="middle" font-family="ChartHeb" font-weight="700">זיו התורה</text></g>
+</svg>
+<div class="title t1">טעמי</div><div class="title t2">המקרא</div>
+</div></div></div></div>
+<div class="toast" id="toast"></div>
+<audio id="au" preload="auto"></audio>
+<script src="marks.js"></script><script src="timings.js"></script>
+<script>
+const CROWN='<svg class="ic" width="22" height="15" viewBox="0 0 22 15"><path d="M2 13 L1 4 L6.5 8 L11 1.5 L15.5 8 L21 4 L20 13 Z" fill="#9a9a9a" stroke="#333" stroke-width="1"/><circle cx="1.3" cy="3.6" r="1.3" fill="#333"/><circle cx="11" cy="1.5" r="1.3" fill="#333"/><circle cx="20.7" cy="3.6" r="1.3" fill="#333"/><rect x="2" y="12" width="18" height="2.4" fill="#444"/></svg>';
+const HAND='<svg class="ic" width="24" height="14" viewBox="0 0 24 14"><g transform="translate(24,0) scale(-1,1)"><path d="M23 4 H10 C8 4 7 2 5 2 H3 C1.5 2 1 3.5 1 5 V10 C1 12 2.5 13 4 13 H12 C13.5 13 14 11.5 13 10.5 C14.5 10.5 15 8.5 13.5 8 C15 7.6 15 6.2 13.8 6 H23 C24 6 24 4 23 4 Z" fill="#f2f2f2" stroke="#333" stroke-width="1.1"/><path d="M5 2 v4 M8 9h5" stroke="#333" stroke-width=".9" fill="none"/><path d="M1 6 H0 V12 H1" fill="#333"/></g></svg>';
+const TD=window.TIMINGS||{};let voice=localStorage.getItem('tropVoice')||'rebbi';
+function cur(){return TD[voice]||TD.rebbi||[]}
+const au=document.getElementById('au'),stage=document.getElementById('stage'),ctl=document.getElementById('ctl');
+const T={};function reT(){for(const k in T)delete T[k];cur().forEach(t=>T[t.id]=t)}reT();let seq=-1;au.src=voice+'.mp3';const tiles={};let mode='play',stopAt=null,raf;
+
+const POS={0x599:'al',0x5AE:'al',0x592:'al',0x5A9:'al',0x5A0:'ar',0x59A:'br',
+ 0x597:'a',0x594:'a',0x595:'a',0x5A1:'a',0x5A8:'a',0x59C:'a',0x59E:'a',0x593:'a',0x59F:'a',0x59D:'a'};
+function bigMarks(d,w){let base='',ms=[];for(const ch of w){const c=ch.codePointAt(0);if((c>=0x591&&c<=0x5AF)){ms.push(c)}else base+=ch}
+ d.textContent=base;d.style.position='relative';
+ ms.forEach(c=>{const p=POS[c]||'b';const sp=document.createElement('span');sp.className='tm '+p;sp.textContent='\u00A0'+String.fromCodePoint(c);d.appendChild(sp)})}
+const ROWTOP=[168,274,380,486,594],PITCH=102.5,RIGHT=955;
+MARKS.forEach((row,r)=>row.forEach(([id,txt,ty],i)=>{const b=document.createElement('div');b.className='box'+(txt.includes('|')?' two':'');
+ let right;if(r<3)right=1000-(RIGHT-i*PITCH);else if(r===3)right=1000-(RIGHT-(i+1)*PITCH);else{const w=4*92+3*14,start=500+w/2;right=1000-start+i*106;}
+ b.style.right=right+'px';b.style.top=ROWTOP[r]+'px';
+ b.innerHTML=(ty==='C'?CROWN:ty==='H'?HAND:'')+txt.split('|').map(s=>'<div></div>').join('');
+ [...b.querySelectorAll('div')].forEach((d,k)=>bigMarks(d,txt.split('|')[k]));[...b.querySelectorAll('div')].forEach(d=>d.style.display='inline-block');b.dataset.h=txt;b.onclick=()=>tap(id);tiles[id]=b;stage.appendChild(b)}));
+function fit(){const w=document.getElementById('wrap'),W=w.clientWidth-26,H=w.clientHeight-26,s=Math.min(W/1000,H/750);
+ stage.style.transform=`scale(${s})`;const h=document.getElementById('holder');h.style.width=1000*s+'px';h.style.height=750*s+'px'}
+function shrink(){for(const k in tiles)tiles[k].querySelectorAll('div').forEach(d=>{d.style.transform='';const w=d.scrollWidth;if(w>84)d.style.transform=`scaleX(${84/w})`})}
+addEventListener('resize',fit);fit();document.fonts&&document.fonts.ready.then(()=>{fit();shrink()});shrink();
+let litId=null;const lit=id=>{if(id===litId)return;litId=id;for(const k in tiles)tiles[k].classList.toggle('lit',k===id);document.body.classList.toggle('haslit',!!id)};
+function loop(){const c=au.currentTime;if(stopAt!==null&&c>=stopAt){au.pause();stopAt=null;if(mode!=='game')setTimeout(()=>lit(null),300);return}
+ if(mode==='play'&&seq>=0){const L=cur();let t=L[seq];if(c>=t.end-0.02){seq++;if(seq>=L.length){au.pause();seq=-1;lit(null);render();return}t=L[seq];if(Math.abs(t.start-c)>0.15)au.currentTime=t.start}lit(t.id)}raf=requestAnimationFrame(loop)}
+function seg(id){const t=T[id];if(!t)return toast('אין הקלטה');cancelAnimationFrame(raf);au.currentTime=t.start;stopAt=t.end;au.play();loop()}
+function toast(s){const e=document.getElementById('toast');e.textContent=s;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),900)}
+function confetti(){const c=['#b8963e','#1c2b52','#d9b75a','#8aa0c8'];for(let i=0;i<36;i++){const e=document.createElement('div');e.className='conf';
+ e.style.cssText+=`width:8px;height:12px;background:${c[i%4]};border-radius:2px;left:${Math.random()*100}vw;animation-duration:${1.8+Math.random()*1.4}s;animation-delay:${Math.random()*.3}s`;
+ document.body.appendChild(e);setTimeout(()=>e.remove(),3600)}}
+let score=0,target=null;
+function tap(id){if(mode==='cal')return;if(mode==='tap'){lit(id);seg(id)}else if(mode==='game'&&target){const t=tiles[id];
+ if(id===target||t.dataset.h===tiles[target].dataset.h){score++;t.classList.add('good');confetti();toast(['יפה מאוד!','כל הכבוד!','מצוין!','נהדר!'][score%4]);
+ setTimeout(()=>{t.classList.remove('good');next()},1100)}else{t.classList.add('bad');toast('נסה שוב');setTimeout(()=>t.classList.remove('bad'),600)}render()}
+ else if(mode==='play'&&T[id]){seq=cur().findIndex(x=>x.id===id);au.currentTime=T[id].start;if(au.paused){au.play();loop();render()}}}
+function next(){const ids=Object.keys(T);if(!ids.length)return;target=ids[Math.random()*ids.length|0];render();seg(target)}
+function render(){if(mode==='play')ctl.innerHTML='<button id="pb">'+(au.paused?(seq>0?'המשך':'נגן הכל'):'עצור')+'</button>';
+ else if(mode==='tap')ctl.innerHTML='<span>הקש על טעם כדי לשמוע אותו</span>';
+ else if(mode==='game')ctl.innerHTML=`<button id="ng">${target?'הבא':'התחל'}</button><button id="ag">שמע שוב</button><span class="score">ניקוד ${score}</span>`;
+ ctl.insertAdjacentHTML('afterbegin',`<div class="modes voice"><button data-v="rebbi" class="${voice==='rebbi'?'on':''}">רבי</button><button data-v="kids" class="${voice==='kids'?'on':''}">ילדים</button></div>`);
+ ctl.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{voice=b.dataset.v;localStorage.setItem('tropVoice',voice);const was=!au.paused&&mode==='play';au.pause();reT();au.src=voice+'.mp3';const go=()=>{if(seq>=0)au.currentTime=cur()[seq].start;if(was){au.play();loop()}};au.addEventListener('loadedmetadata',go,{once:true});render()});
+ const pb=document.getElementById('pb');if(pb)pb.onclick=()=>{if(au.paused){stopAt=null;if(seq<0){seq=0;au.currentTime=cur()[0].start}au.play();loop()}else au.pause();render()};
+ const ng=document.getElementById('ng');if(ng)ng.onclick=next;const ag=document.getElementById('ag');if(ag)ag.onclick=()=>target&&seg(target)}
+au.onended=au.onpause=()=>{if(mode==='play')render()};
+document.querySelectorAll('.modes:not(.voice) button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.bar>.modes button').forEach(x=>x.classList.remove('on'));
+ b.classList.add('on');mode=b.dataset.m;au.pause();stopAt=null;seq=-1;lit(null);target=null;render()});render();
+// ---- internal calibrate mode (only via ?calibrate URL) ----
+const ORDER=MARKS.flat().map(m=>m[0]);let cal=[];
+function startCal(){mode='cal';au.pause();lit(null);cal=[];ctl.innerHTML='<span>כיול: הקש בכל מקום בתחילת כל טעם</span><button id="cs">התחל</button><button id="cx">ביטול</button>';
+ document.getElementById('cs').onclick=e=>{e.stopPropagation();cal=[];au.currentTime=0;stopAt=null;au.play();lit(ORDER[0])};
+ document.getElementById('cx').onclick=e=>{e.stopPropagation();endCal(false)}}
+document.addEventListener('pointerdown',e=>{if(mode!=='cal'||au.paused||e.target.closest('button'))return;e.preventDefault();e.stopPropagation();
+ cal.push(+au.currentTime.toFixed(3));lit(ORDER[cal.length]);if(cal.length>=ORDER.length)endCal(true)},true);
+au.addEventListener('ended',()=>{if(mode==='cal')endCal(true)});
+function endCal(save){au.pause();lit(null);mode='play';document.querySelectorAll('.modes button').forEach(x=>x.classList.toggle('on',x.dataset.m==='play'));
+ if(save&&cal.length){const end=au.duration||cal[cal.length-1]+1;const out=cal.map((st,i)=>({id:ORDER[i],start:st,end:+(cal[i+1]??end).toFixed(3)}));
+ TD[voice]=out;reT();
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(TD,null,1)],{type:'application/json'}));a.download='timings.json';a.textContent='ייצוא timings.json';
+ ctl.innerHTML=`<span>נשמרו ${out.length}/${ORDER.length}</span>`;ctl.appendChild(a);const r=document.createElement('button');r.textContent='איפוס';r.onclick=()=>location.reload();ctl.appendChild(r)}else render()}
+if(/#lit/.test(location.hash))lit(location.hash.slice(5));
+if(/calibrate/.test(location.search))startCal();
+</script><script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));</script></body></html>
